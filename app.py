@@ -9,9 +9,7 @@ from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
-# -------------------------------
-# Load Model & Preprocessor
-# -------------------------------
+
 model = tf.keras.models.load_model("artifacts/model.h5")
 
 with open("artifacts/preprocessor.pkl", "rb") as f:
@@ -19,9 +17,7 @@ with open("artifacts/preprocessor.pkl", "rb") as f:
 
 df = pd.read_csv("notebook/data/iris.csv")
 
-# -------------------------------
-# Move graphs to static (auto)
-# -------------------------------
+
 os.makedirs("static", exist_ok=True)
 
 if os.path.exists("artifacts/confusion_matrix.png"):
@@ -30,9 +26,7 @@ if os.path.exists("artifacts/confusion_matrix.png"):
 if os.path.exists("artifacts/feature_importance.png"):
     shutil.copy("artifacts/feature_importance.png", "static/feature_importance.png")
 
-# -------------------------------
-# Helpers
-# -------------------------------
+
 def safe_float(value):
     try:
         return float(value)
@@ -59,9 +53,7 @@ def predict_values(sl, sw, pl, pw):
     return label, confidence
 
 
-# -------------------------------
-# Routes
-# -------------------------------
+
 @app.route("/")
 def home():
     return render_template("index.html")
