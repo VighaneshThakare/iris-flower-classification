@@ -4,29 +4,99 @@ import numpy as np
 import pickle
 import tensorflow as tf
 import os
-
-# -------------------------------
-# Load artifacts (DL FIX)
-# -------------------------------
-model = tf.keras.models.load_model("artifacts/model.h5")
-scaler, label_encoder = pickle.load(open("artifacts/preprocessor.pkl", "rb"))
-
-# Dataset for random sample
-df = pd.read_csv("notebook/data/iris.csv")
+import json
 
 st.set_page_config(page_title="Iris Classifier", layout="centered")
 
-st.title("🌸 Iris Flower Classification")
-st.caption("Predict species using sepal and petal measurements")
+USER_FILE = "users.json"
 
-# -------------------------------
-# Helpers
-# -------------------------------
-def safe_float(value):
-    try:
-        return float(value)
-    except:
-        return None
+def load_users():
+    if not os.path.exists(USER_FILE):
+        return {}
+    with open(USER_FILE, "r") as f:
+        return json.load(f)
+
+def save_users(users):
+    with open(USER_FILE, "w") as f:
+        json.dump(users, f)
+
+users = load_users()
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+if "inputs" not in st.session_state:
+    st.session_state.inputs = {"sl": 5.5, "sw": 3.0, "pl": 4.0, "pw": 1.2}
+
+if "result" not in st.session_state:
+    st.session_state.result = None
+
+def login(username, password):
+    if username in users and users[username] == password:
+        st.session_state.logged_in = True
+        st.session_state.username = username
+        st.rerun()
+    else:
+        st.error("Invalid credentials")
+
+def register(username, password):
+    if username in users:
+        st.error("User already exists")
+    elif username == "" or password == "":
+        st.warning("Fields cannot be empty")
+    else:
+        users[username] = password
+        save_users(users)
+        st.success("Registration successful! Please login.")
+
+def logout():
+    st.session_state.logged_in = False
+    st.session_state.username = ""
+    st.rerun()
+
+if not st.session_state.logged_in:
+
+    tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
+
+    with tab1:
+        st.subheader("Login")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+
+        if st.button("Login"):
+            login(username, password)
+
+    with tab2:
+        st.subheader("Register")
+        new_user = st.text_input("New Username")
+        new_pass = st.text_input("New Password", type="password")
+
+        if st.button("Register"):
+            register(new_user, new_pass)
+
+    st.stop()
+
+model = tf.keras.models.load_model("artifacts/model.h5")
+scaler, label_encoder = pickle.load(open("artifacts/preprocessor.pkl", "rb"))
+df = pd.read_csv("notebook/data/iris.csv")
+
+st.markdown("""
+<style>
+.stApp {
+    background-color: #0f172a;
+    color: white;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("🌸 Iris Flower Classification")
+st.caption(f"Welcome, {st.session_state.username}")
+
+if st.button("Logout"):
+    logout()
 
 def run_prediction(sl, sw, pl, pw):
     data = pd.DataFrame({
@@ -37,7 +107,6 @@ def run_prediction(sl, sw, pl, pw):
     })
 
     scaled = scaler.transform(data)
-
     probs = model.predict(scaled)
     pred = np.argmax(probs, axis=1)
 
@@ -51,210 +120,124 @@ def run_prediction(sl, sw, pl, pw):
 
     return label, confidence, class_probs
 
-# -------------------------------
-# Session state
-# -------------------------------
-if "inputs" not in st.session_state:
-    st.session_state.inputs = {"sl": "", "sw": "", "pl": "", "pw": ""}
+tab1, tab2, tab3 = st.tabs(["Prediction", "Insights", "About"])
 
-if "last_result" not in st.session_state:
-    st.session_state.last_result = None
-
-# -------------------------------
-# Tabs (RESTORED UI)
-# -------------------------------
-tab1, tab2, tab3 = st.tabs(["🔮 Prediction", "📊 Insights", "ℹ️ About"])
-
-# ===============================
-# 🔮 Prediction Tab
-# ===============================
 with tab1:
+
+    st.subheader("Enter Flower Measurements")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        sl = st.text_input("Sepal Length", value=st.session_state.inputs["sl"])
-        sw = st.text_input("Sepal Width", value=st.session_state.inputs["sw"])
+        sl = st.slider("Sepal Length", 4.0, 8.0, st.session_state.inputs["sl"])
+        sw = st.slider("Sepal Width", 2.0, 4.5, st.session_state.inputs["sw"])
 
     with col2:
-        pl = st.text_input("Petal Length", value=st.session_state.inputs["pl"])
-        pw = st.text_input("Petal Width", value=st.session_state.inputs["pw"])
+        pl = st.slider("Petal Length", 1.0, 7.0, st.session_state.inputs["pl"])
+        pw = st.slider("Petal Width", 0.1, 2.5, st.session_state.inputs["pw"])
 
-    c1, c2, c3 = st.columns(3)
+    b1, b2, b3 = st.columns(3)
 
-    # Predict
-    with c1:
+    with b1:
         if st.button("Predict", use_container_width=True):
-            sl_f = safe_float(sl)
-            sw_f = safe_float(sw)
-            pl_f = safe_float(pl)
-            pw_f = safe_float(pw)
+            st.session_state.result = run_prediction(sl, sw, pl, pw)
 
-            if None in [sl_f, sw_f, pl_f, pw_f]:
-                st.error("Please enter valid numeric values.")
-            else:
-                label, confidence, class_probs = run_prediction(sl_f, sw_f, pl_f, pw_f)
-                st.session_state.last_result = (label, confidence, class_probs)
-                st.session_state.inputs = {"sl": sl, "sw": sw, "pl": pl, "pw": pw}
-
-    # Random Sample (same feature retained)
-    with c2:
-        if st.button("Random Sample", use_container_width=True):
+    with b2:
+        if st.button("Sample Values", use_container_width=True):
             sample = df.sample(1).iloc[0]
-
             st.session_state.inputs = {
-                "sl": str(sample["SepalLengthCm"]),
-                "sw": str(sample["SepalWidthCm"]),
-                "pl": str(sample["PetalLengthCm"]),
-                "pw": str(sample["PetalWidthCm"]),
+                "sl": float(sample["SepalLengthCm"]),
+                "sw": float(sample["SepalWidthCm"]),
+                "pl": float(sample["PetalLengthCm"]),
+                "pw": float(sample["PetalWidthCm"])
             }
-
             st.rerun()
 
-    # Reset
-    with c3:
+    with b3:
         if st.button("Reset", use_container_width=True):
-            st.session_state.inputs = {"sl": "", "sw": "", "pl": "", "pw": ""}
-            st.session_state.last_result = None
+            st.session_state.inputs = {"sl": 5.5, "sw": 3.0, "pl": 4.0, "pw": 1.2}
+            st.session_state.result = None
             st.rerun()
 
-    # Result display
-    if st.session_state.last_result:
-        label, confidence, class_probs = st.session_state.last_result
+    if st.session_state.result:
 
-        st.markdown("### Result")
-        m1, m2 = st.columns(2)
-        m1.metric("Predicted Class", label)
-        m2.metric("Confidence", f"{confidence}%")
+        label, confidence, class_probs = st.session_state.result
 
-        st.markdown("### Class Probabilities (%)")
-        prob_df = pd.DataFrame(
-            list(class_probs.items()), columns=["Class", "Probability"]
-        )
+        st.markdown("### Prediction Result")
+
+        c1, c2 = st.columns(2)
+        c1.metric("Predicted Class", label)
+        c2.metric("Confidence", f"{confidence:.2f}%")
+
+        st.progress(int(confidence))
+
+        st.markdown("### Predicted Flower")
+
+        if "setosa" in label.lower():
+            st.image("static/setosa.jpg", width="stretch")
+
+        elif "versicolor" in label.lower():
+            st.image("static/versicolor.jpg", width="stretch")
+
+        else:
+            st.image("static/virginica.jpg", width="stretch")
+
+        prob_df = pd.DataFrame(list(class_probs.items()), columns=["Class", "Probability"])
         st.bar_chart(prob_df.set_index("Class"))
 
-# ===============================
-# 📊 Insights Tab
-# ===============================
+        avg = df.drop(columns=["Id", "Species"]).mean()
+        compare_df = pd.DataFrame({
+            "Your Input": [sl, sw, pl, pw],
+            "Average": avg.values
+        }, index=["SL", "SW", "PL", "PW"])
+
+        st.bar_chart(compare_df)
+
+        st.info("Prediction mainly depends on petal features.")
+
 with tab2:
 
-    st.markdown("### Model Visualizations")
+    st.subheader("Model Insights")
 
-    with st.expander("Show Confusion Matrix"):
+    with st.expander("📊 Show Confusion Matrix"):
         if os.path.exists("artifacts/confusion_matrix.png"):
             st.image("artifacts/confusion_matrix.png")
-        else:
-            st.warning("Run training to generate this.")
 
-    with st.expander("Show Feature Importance"):
+    with st.expander("📈 Show Feature Importance"):
         if os.path.exists("artifacts/feature_importance.png"):
             st.image("artifacts/feature_importance.png")
-        else:
-            st.warning("Run training to generate this.")
 
-# ===============================
-# ℹ️ About Tab
-# ===============================
 with tab3:
 
     st.header("📘 Project Overview")
 
-    st.markdown("""
-This project implements a **hybrid Machine Learning and Deep Learning system** 
-to classify Iris flower species based on morphological features.
+    st.write("""
+This project uses Deep Learning (Neural Networks) to classify Iris flowers 
+based on sepal and petal measurements.
 
-The system is designed to demonstrate:
-- Predictive modeling using deep learning
-- Model evaluation and interpretability
-- Real-time deployment using Streamlit
-""")
+### Model:
+- Neural Network (Keras)
+- ReLU activation
+- Softmax output layer
 
-    st.divider()
-
-    st.subheader("🧠 Model Details")
-
-    st.markdown("""
-**Primary Model (Deep Learning):**
-- Feedforward Neural Network (Keras Sequential)
-- Dense layers with ReLU activation
-- Softmax output layer for multi-class classification
-- Loss Function: Sparse Categorical Crossentropy
-- Optimizer: Adam
-
-**Supporting Model (Machine Learning):**
-- Random Forest Classifier
-- Used for feature importance (interpretability)
-""")
-
-    st.divider()
-
-    st.subheader("📊 Dataset Information")
-
-    st.markdown("""
-**Dataset:** Iris Dataset  
-
-**Features:**
-- Sepal Length
-- Sepal Width
-- Petal Length
-- Petal Width
-
-**Target Classes:**
-- Setosa
-- Versicolor
-- Virginica
-""")
-
-    st.divider()
-
-    st.subheader("⚙️ System Workflow")
-
-    st.markdown("""
-1. User inputs flower measurements  
-2. Data is preprocessed using StandardScaler  
-3. Neural network predicts class probabilities  
-4. Highest probability → final prediction  
-5. Confidence score is displayed  
-6. Model insights (confusion matrix & feature importance) are available  
-""")
-
-    st.divider()
-
-    st.subheader("📈 Model Evaluation")
-
-    st.markdown("""
-- **Accuracy:** Measures overall correctness  
-- **Confusion Matrix:** Shows class-wise performance  
-- **Feature Importance:** Identifies most influential features  
-""")
-
-    st.divider()
-
-    st.subheader("💡 Key Features")
-
-    st.markdown("""
+### Features:
 - Real-time prediction  
-- Confidence score display  
-- Random sample generator  
-- Interactive visualization  
-- Hybrid ML + DL architecture  
+- Confidence visualization  
+- Sample data generator  
+- Reset functionality  
+- Model insights visualization  
+- User authentication system  
+
+### Dataset:
+- 150 samples  
+- 3 classes  
+
+### Tech Stack:
+- TensorFlow  
+- Scikit-learn  
+- Pandas  
+- Streamlit  
 """)
 
-    st.divider()
-
-    st.subheader("🎯 Justification of Approach")
-
-    st.markdown("""
-- Deep learning is used for predictive modeling  
-- Random Forest is used for interpretability since neural networks lack transparency  
-- This hybrid approach balances **performance and explainability**  
-""")
-
-    st.divider()
-
-    st.subheader("🚀 Conclusion")
-
-    st.markdown("""
-The system demonstrates how deep learning models can be deployed in real-world 
-applications while maintaining interpretability using traditional machine learning techniques.
-""")
+    st.subheader("👨‍💻 Team")
+    st.write("Vighanesh Thakare, Siddharth Sharma, Somesh Pal, Aditya Nikam")
