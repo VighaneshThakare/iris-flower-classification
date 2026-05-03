@@ -12,35 +12,17 @@ class DataIngestion:
         self.test_data_path = "artifacts/test.csv"
 
     def initiate_data_ingestion(self):
-<<<<<<< HEAD
         logging.info("Initiating data ingestion")
         try:
             df = pd.read_csv("notebook/data/iris.csv")
-=======
-        logging.info("Entered data ingestion method")
-
-        try:
-            df = pd.read_csv("notebook/data/iris.csv")
-
->>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
             os.makedirs("artifacts", exist_ok=True)
             df.to_csv(self.raw_data_path, index=False)
 
             train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
-<<<<<<< HEAD
-=======
-
->>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
             train_set.to_csv(self.train_data_path, index=False)
             test_set.to_csv(self.test_data_path, index=False)
 
             logging.info("Data ingestion completed")
-<<<<<<< HEAD
             return self.train_data_path, self.test_data_path
-=======
-
-            return self.train_data_path, self.test_data_path
-
->>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
         except Exception as e:
             raise CustomException(e, sys)

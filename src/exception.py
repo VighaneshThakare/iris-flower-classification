@@ -2,12 +2,8 @@ import sys
 
 def error_message_detail(error, error_detail: sys):
     _, _, exc_tb = error_detail.exc_info()
-<<<<<<< HEAD
     file_name = exc_tb.tb_frame.f_code.co_filename
     return f"Error occurred in script [{file_name}] at line [{exc_tb.tb_lineno}] : {str(error)}"
-=======
-    return f"Error occurred in script [{exc_tb.tb_frame.f_code.co_filename}] at line [{exc_tb.tb_lineno}] : {str(error)}"
->>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
 
 class CustomException(Exception):
     def __init__(self, error, error_detail: sys):

@@ -49,7 +49,6 @@ The goal is to accurately predict one of three species of the Iris flower based 
 
 ```text
 Iris-Flower-Classification/
-<<<<<<< HEAD
 │
 ├── artifacts/                        # ML outputs
 │   ├── data.csv
@@ -77,33 +76,10 @@ Iris-Flower-Classification/
 │   │   └── training_pipeline.py
 │   │
 │   ├── __init__.py
-=======
-├── artifacts/              # Generated files (models & outputs)
-│   ├── model.h5
-│   ├── preprocessor.pkl
-│   ├── confusion_matrix.png
-│   └── feature_importance.png
-│
-├── notebook/               # Jupyter notebooks (EDA & training)
-│   ├── data/
-│   │   └── iris.csv
-│   ├── 1. EDA IRIS DATASET.ipynb
-│   └── 2. MODEL TRAINING IRIS.ipynb
-│
-├── src/                    # Core ML pipeline code
-│   ├── components/
-│   │   ├── data_ingestion.py
-│   │   ├── data_transformation.py
-│   │   └── model_trainer.py
-│   ├── pipeline/
-│   │   ├── training_pipeline.py
-│   │   └── predict_pipeline.py
->>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
 │   ├── exception.py
 │   ├── logger.py
 │   └── utils.py
 │
-<<<<<<< HEAD
 ├── static/                           # Frontend assets
 │   ├── css/
 │   │   ├── style.css
@@ -126,20 +102,6 @@ Iris-Flower-Classification/
 ├── setup.py                          # Package config
 ├── README.md                         # Documentation
 ├── .gitignore                        # Ignore rules
-=======
-├── templates/              # Flask UI
-│   └── index.html
-│
-├── static/                 # Graphs & images
-│   ├── confusion_matrix.png
-│   └── feature_importance.png
-│
-├── app.py                  # Flask application
-├── streamlit_app.py        # Streamlit application
-├── requirements.txt
-├── README.md
-└── .gitignore
->>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
 
 ## ⚙️ Tech Stack
 
