@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris · Flower Classifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <ellipse cx="9" cy="9" rx="3" ry="6" fill="white" opacity="0.9" transform="rotate(-30 9 9)"/>
+                <ellipse cx="9" cy="9" rx="3" ry="6" fill="white" opacity="0.7" transform="rotate(30 9 9)"/>
+                <ellipse cx="9" cy="9" rx="3" ry="6" fill="white" opacity="0.85" transform="rotate(90 9 9)"/>
+            </svg>
+        </div>
+        <span class="logo-text"><span>Iris</span> Classifier</span>
+    </div>
+    <span class="header-tag">Neural Network · TensorFlow</span>
+</header>
+
+<main>
+
+    <!-- Hero -->
+    <div class="hero">
+        <p class="hero-eyebrow">Botanical Intelligence</p>
+        <h1 class="hero-title">Identify <em>Iris</em><br>species with precision</h1>
+        <p class="hero-desc">Enter flower measurements and the model will classify the species with confidence.</p>
+    </div>
+
+    <!-- Measurements Panel -->
+    <div class="panel">
+        <p class="panel-title">Measurements</p>
+
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Sepal Length</label>
+                <div class="input-wrapper">
+                    <input type="number" step="0.1" id="sl" placeholder="5.1">
+                    <span class="unit">cm</span>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Sepal Width</label>
+                <div class="input-wrapper">
+                    <input type="number" step="0.1" id="sw" placeholder="3.5">
+                    <span class="unit">cm</span>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Petal Length</label>
+                <div class="input-wrapper">
+                    <input type="number" step="0.1" id="pl" placeholder="1.4">
+                    <span class="unit">cm</span>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Petal Width</label>
+                <div class="input-wrapper">
+                    <input type="number" step="0.1" id="pw" placeholder="0.2">
+                    <span class="unit">cm</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="classify()">Classify Flower →</button>
+            <button class="btn btn-outline" onclick="loadSample()">Sample</button>
+            <button class="btn btn-outline" onclick="resetForm()">Reset</button>
+        </div>
+
+        <p id="error-msg" style="display:none; margin-top:14px; font-size:0.75rem; color:#c0392b;"></p>
+    </div>
+
+    <!-- Result Panel (hidden until prediction) -->
+    <div class="panel result-panel" id="result-panel" style="display:none;">
+        <p class="panel-title">Result</p>
+        <div class="result-inner">
+            <div class="result-badge" id="result-badge">
+                <span class="result-label-text" id="result-label"></span>
+                <span class="result-confidence" id="result-confidence"></span>
+            </div>
+            <div class="prob-bars" id="prob-bars"></div>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    iris · classification · tensorflow model
+</footer>
+
+<script>
+    function speciesKey(label) {
+        return (label.includes('-') ? label.split('-')[1] : label).toLowerCase();
+    }
+
+    async function classify() {
+        const sl = document.getElementById('sl').value;
+        const sw = document.getElementById('sw').value;
+        const pl = document.getElementById('pl').value;
+        const pw = document.getElementById('pw').value;
+
+        const errEl = document.getElementById('error-msg');
+        errEl.style.display = 'none';
+
+        if (!sl || !sw || !pl || !pw) {
+            errEl.textContent = 'Please fill in all four measurements.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sl, sw, pl, pw })
+            });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            showResult(data);
+        } catch {
+            errEl.textContent = 'Prediction failed. Is the server running?';
+            errEl.style.display = 'block';
+        }
+    }
+
+    function showResult({ label, confidence, probs }) {
+        const key = speciesKey(label);
+
+        const badge = document.getElementById('result-badge');
+        badge.className = `result-badge ${key}`;
+        document.getElementById('result-label').textContent = label.split('-')[1] ?? label;
+        document.getElementById('result-confidence').textContent = `${confidence}% confidence`;
+
+        document.getElementById('prob-bars').innerHTML = Object.entries(probs)
+            .map(([name, value]) => `
+                <div class="prob-row">
+                    <span class="prob-name">${name}</span>
+                    <div class="prob-track">
+                        <div class="prob-fill ${speciesKey(name)}" style="width:${value}%"></div>
+                    </div>
+                    <span class="prob-pct">${value}%</span>
+                </div>`).join('');
+
+        const panel = document.getElementById('result-panel');
+        panel.style.display = 'block';
+        panel.style.animation = 'none';
+        panel.offsetHeight;
+        panel.style.animation = '';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function loadSample() {
+        try {
+            const data = await fetch('/sample').then(r => r.json());
+            ['sl','sw','pl','pw'].forEach(id => {
+                document.getElementById(id).value = data[id];
+                const el = document.getElementById(id);
+                el.style.borderColor = 'var(--accent)';
+                setTimeout(() => el.style.borderColor = '', 800);
+            });
+        } catch (err) {
+            console.error('Sample load failed', err);
+        }
+    }
+
+    function resetForm() {
+        ['sl','sw','pl','pw'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('result-panel').style.display = 'none';
+        document.getElementById('error-msg').style.display = 'none';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') classify(); });
+</script>
+
+</body>
+</html>

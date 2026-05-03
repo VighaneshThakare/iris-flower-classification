@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# logs
+logs/*
+!logs/.gitkeep
+*.log
+
+# Build / Packaging
+build/
+dist/
+*.egg-info/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temporary Files
+*.tmp
+*.swp
+
+# Streamlit
+.streamlit/
+
+# Environment Variables
+.env
+
+# Optional user data
+users.json
