@@ -1,14 +1,27 @@
+<<<<<<< HEAD
 # Python
+=======
+# ================================
+# Python
+# ================================
+>>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
+<<<<<<< HEAD
 # Virtual Environment
+=======
+# ================================
+# Virtual Environment
+# ================================
+>>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
 venv/
 env/
 .venv/
 
+<<<<<<< HEAD
 # IDE / Editor
 .vscode/
 .idea/
@@ -19,10 +32,28 @@ logs/*
 *.log
 
 # Build / Packaging
+=======
+# ================================
+# IDE / Editor
+# ================================
+.vscode/
+.idea/
+
+# ================================
+# Logs
+# ================================
+logs/
+*.log
+
+# ================================
+# Build / Packaging
+# ================================
+>>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
 build/
 dist/
 *.egg-info/
 
+<<<<<<< HEAD
 # OS Files
 .DS_Store
 Thumbs.db
@@ -42,3 +73,40 @@ Thumbs.db
 
 # Optional user data
 users.json
+=======
+# ================================
+# OS Files
+# ================================
+.DS_Store
+Thumbs.db
+
+# ================================
+# Jupyter
+# ================================
+.ipynb_checkpoints/
+
+# ================================
+# Temporary Files
+# ================================
+*.tmp
+*.swp
+
+# ================================
+# ML Artifacts (IMPORTANT)
+# ================================
+artifacts/*.pkl
+artifacts/*.h5
+
+# Keep graphs (optional)
+# artifacts/*.png
+
+# ================================
+# Streamlit
+# ================================
+.streamlit/
+
+# ================================
+# Environment Variables
+# ================================
+.env
+>>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539

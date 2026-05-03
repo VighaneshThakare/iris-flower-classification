@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
 <html lang="en">
 
 <head>
@@ -9,10 +10,57 @@
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style_1.css">
+=======
+<html>
+<head>
+    <title>Iris Classifier</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+            text-align: center;
+        }
+
+        .container {
+            margin-top: 80px;
+            background: white;
+            padding: 30px;
+            width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px gray;
+        }
+
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 8px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+>>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
 </head>
 
 <body>
 
+<<<<<<< HEAD
     <header>
         <a href="/" class="logo">
             <div class="logo-mark">
@@ -47,4 +95,27 @@
 
 </body>
 
+=======
+<div class="container">
+    <h2>Iris Flower Classifier</h2>
+
+    <form action="/predict" method="post">
+        <input type="number" step="any" name="sepal_length" placeholder="Sepal Length" required>
+        <input type="number" step="any" name="sepal_width" placeholder="Sepal Width" required>
+        <input type="number" step="any" name="petal_length" placeholder="Petal Length" required>
+        <input type="number" step="any" name="petal_width" placeholder="Petal Width" required>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if results %}
+    <div class="result">
+        <p><strong>Prediction:</strong> {{ results }}</p>
+        <p><strong>Confidence:</strong> {{ confidence }}%</p>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+>>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
 </html>

@@ -1,5 +1,6 @@
 pandas
 numpy
+<<<<<<< HEAD
 matplotlib
 seaborn
 scikit-learn
@@ -7,3 +8,12 @@ tensorflow
 Flask
 dill
 -e .
+=======
+scikit-learn
+flask
+matplotlib
+seaborn
+dill
+streamlit
+tensorflow
+>>>>>>> d743ec0794036bbb46ae63f1cece06729a8a3539
