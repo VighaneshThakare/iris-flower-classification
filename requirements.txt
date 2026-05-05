@@ -1,9 +1,7 @@
+Flask
+gunicorn
+tensorflow
 pandas
 numpy
-matplotlib
-seaborn
 scikit-learn
-tensorflow
-Flask
 dill
--e .
