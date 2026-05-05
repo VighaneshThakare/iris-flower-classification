@@ -59,28 +59,14 @@ def classifier():
 @app.route("/predict", methods=["POST"])
 def make_prediction():
     try:
-        logging.info("Prediction request received")
-
         data = request.get_json()
-
-        if not data:
-            logging.warning("No input data received")
-            return jsonify({"error": "No input data provided"}), 400
 
         sl = data.get("sl")
         sw = data.get("sw")
         pl = data.get("pl")
         pw = data.get("pw")
 
-        if None in [sl, sw, pl, pw]:
-            logging.warning("Missing input values")
-            return jsonify({"error": "Missing input values"}), 400
-
-        logging.info(f"Input values - SL: {sl}, SW: {sw}, PL: {pl}, PW: {pw}")
-
         label, confidence, class_probs = predict(sl, sw, pl, pw)
-
-        logging.info(f"Prediction: {label} with confidence {confidence}%")
 
         return jsonify({
             "label": label,
@@ -89,8 +75,7 @@ def make_prediction():
         })
 
     except Exception as e:
-        logging.error(f"Prediction error: {e}")
-        raise CustomException(e, sys)
+        return jsonify({"error": str(e)}), 500
 
 
 # SAMPLE DATA (JSON)
